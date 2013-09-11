@@ -34,7 +34,7 @@ public class BundleVersionChecker
 	/// <summary>
 	/// If set, version with history tracking will be generated.
 	/// </summary>
-	static bool trackedMode = false;
+	static bool trackedMode = true;
 
 	/// <summary>
 	/// Target dir for file [ClassName].cs.
@@ -50,11 +50,13 @@ public class BundleVersionChecker
 	/// </summary>
 	const string TrackedClassName = "TrackedBundleVersion";
 	
-	public static string ClassName {
+	static string ClassName {
 		get { return (trackedMode ? TrackedClassName : SimpleClassName); }
 	}
 	
-	static string TargetCodeFile = TargetDir + "/" + ClassName + ".cs";
+	static string TargetCodeFile { 
+		get { return TargetDir + "/" + ClassName + ".cs"; }
+	}
 	
 	static AbstractBundleVersionGenerator generator;
 	
@@ -100,10 +102,4 @@ public class BundleVersionChecker
 		}
 	}
 	
-	static string GenerateCode (string bundleVersion) {
-		string code = "public class " + ClassName + "\n{\n";
-		code += System.String.Format ("\tpublic string version = \"{0}\";", bundleVersion);
-		code += "\n}\n";
-		return code;
-	}
 }
