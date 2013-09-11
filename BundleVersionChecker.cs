@@ -1,11 +1,33 @@
-// Created by Kay
-// Copyright 2013 by SCIO System-Consulting GmbH & Co. KG. All rights reserved.
+// The MIT License (MIT)
+// 
+//    Copyright 2013 by Kay Bothfeld, Germany
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+// the Software, and to permit persons to whom the Software is furnished to do so,
+// subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 using UnityEngine;
 using UnityEditor;
 using System;
 using System.IO;
 using System.Reflection;
 
+/// <summary>
+/// Editor class for generating a class containing bundle version information to be accessed at runtime.
+/// </summary>
 [InitializeOnLoad]
 public class BundleVersionChecker
 {
@@ -25,7 +47,7 @@ public class BundleVersionChecker
 			FieldInfo fieldInfo = type.GetField ("version");
 			string lastVersion = (string)fieldInfo.GetValue (lastVersionObject);
 			if (lastVersion != bundleVersion) {
-				Debug.Log ("Found new bundle version " + bundleVersion + " replacing code from previous version " + lastVersion +" in file \"" + TargetCodeFile + "\"");
+				Debug.Log ("Found new bundle version " + bundleVersion + " replacing code from previous version " + lastVersion + " in file \"" + TargetCodeFile + "\"");
 				CreateNewBuildVersionClassFile (bundleVersion);
 			}
 		} else {
@@ -33,7 +55,13 @@ public class BundleVersionChecker
 			CreateNewBuildVersionClassFile (bundleVersion);
 		}
 	}
-
+	
+	/// <summary>
+	/// Creates the new class file for ClassName.cs regardless if there is an existing one or not.
+	/// </summary>
+	/// <param name='bundleVersion'>
+	/// New bundle version to write into code.
+	/// </param>
 	static void CreateNewBuildVersionClassFile (string bundleVersion) {
 		using (StreamWriter writer = new StreamWriter (TargetCodeFile, false)) {
 			try {
@@ -48,10 +76,15 @@ public class BundleVersionChecker
 	}
 	
 	/// <summary>
-	/// Regenerates (and replaces) the code for ClassName with new bundle version id.
+	/// Regenerates the code for ClassName with new bundle version id.
 	/// </summary>
 	/// <returns>
-	/// Code to write to file.
+	/// Code to write to file i.e. something like:
+	/// "public class CurrentBundleVersion
+	/// {
+	///     public string version = "0.8.5";
+	/// }"
+	/// 
 	/// </returns>
 	/// <param name='bundleVersion'>
 	/// New bundle version.
