@@ -15,12 +15,12 @@ public class BundleVersionChecker
 	const string TargetCodeFile = "Assets/Scripts/Config/" + ClassName + ".cs";
 	
 	static BundleVersionChecker () {
-		string bundleVersion = PlayerSettings.bundleVersion;
-		string lastVersion = CurrentBundleVersion.version;
-		if (lastVersion != bundleVersion) {
-			Debug.Log ("Found new bundle version " + bundleVersion + " replacing code from previous version " + lastVersion +" in file \"" + TargetCodeFile + "\"");
-			CreateNewBuildVersionClassFile (bundleVersion);
-		}
+//		string bundleVersion = PlayerSettings.bundleVersion;
+//		string lastVersion = CurrentBundleVersion.version;
+//		if (lastVersion != bundleVersion) {
+//			Debug.Log ("Found new bundle version " + bundleVersion + " replacing code from previous version " + lastVersion +" in file \"" + TargetCodeFile + "\"");
+//			CreateNewBuildVersionClassFile (bundleVersion);
+//		}
 	}
 
 	static string CreateNewBuildVersionClassFile (string bundleVersion) {
@@ -31,7 +31,7 @@ public class BundleVersionChecker
 			} catch (System.Exception ex) {
 				string msg = " threw:\n" + ex.ToString ();
 				Debug.LogError (msg);
-				EditorUtility.DisplayDialog ("Error when trying to regenrate class", msg, "OK");
+				EditorUtility.DisplayDialog ("Error when trying to regenerate class", msg, "OK");
 			}
 		}
 		return TargetCodeFile;
