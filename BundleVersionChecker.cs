@@ -35,8 +35,9 @@ public class BundleVersionChecker
 	/// Class name to use when referencing from code.
 	/// </summary>
 	const string ClassName = "CurrentBundleVersion";
+	const string TargetDir = "Assets/Scripts/Config/BundleVersionCheck";
 	
-	const string TargetCodeFile = "Assets/Scripts/Config/" + ClassName + ".cs";
+	const string TargetCodeFile = TargetDir + "/" + ClassName + ".cs";
 	
 	static BundleVersionChecker () {
 		string bundleVersion = PlayerSettings.bundleVersion;
@@ -63,6 +64,17 @@ public class BundleVersionChecker
 	/// New bundle version to write into code.
 	/// </param>
 	static void CreateNewBuildVersionClassFile (string bundleVersion) {
+		if (File.Exists (TargetDir)) {
+			Debug.LogWarning (TargetDir + " is a file instead of a directory !");
+			return;
+		} else if (!Directory.Exists (TargetDir)) {
+			try {
+				Directory.CreateDirectory (TargetDir);
+			} catch (System.Exception ex) {
+				Debug.LogWarning (ex.Message);
+				throw ex;
+			}
+		}
 		using (StreamWriter writer = new StreamWriter (TargetCodeFile, false)) {
 			try {
 				string code = GenerateCode (bundleVersion);
@@ -70,7 +82,7 @@ public class BundleVersionChecker
 			} catch (System.Exception ex) {
 				string msg = " \n" + ex.ToString ();
 				Debug.LogError (msg);
-				EditorUtility.DisplayDialog ("Error when trying to regenerate class", msg, "OK");
+				EditorUtility.DisplayDialog ("Error when trying to regenerate file " + TargetCodeFile, msg, "OK");
 			}
 		}
 	}
