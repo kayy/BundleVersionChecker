@@ -32,27 +32,40 @@ using System.Reflection;
 public class BundleVersionChecker
 {
 	/// <summary>
-	/// Class name to use when referencing from code.
+	/// If set, version with history tracking will be generated.
 	/// </summary>
-	const string ClassName = "CurrentBundleVersion";
+	static bool trackedMode = false;
+
+	/// <summary>
+	/// Target dir for file [ClassName].cs.
+	/// </summary>
 	const string TargetDir = "Assets/Scripts/Config/BundleVersionCheck";
 	
-	const string TargetCodeFile = TargetDir + "/" + ClassName + ".cs";
+	/// <summary>
+	/// Class name to use when tracking history is disabled.
+	/// </summary>
+	const string SimpleClassName = "CurrentBundleVersion";
+	/// <summary>
+	/// Class name when history tracking is enabled.
+	/// </summary>
+	const string TrackedClassName = "TrackedBundleVersion";
+	
+	public static string ClassName {
+		get { return (trackedMode ? TrackedClassName : SimpleClassName); }
+	}
+	
+	static string TargetCodeFile = TargetDir + "/" + ClassName + ".cs";
+	
+	static AbstractBundleVersionGenerator generator;
 	
 	static BundleVersionChecker () {
 		string bundleVersion = PlayerSettings.bundleVersion;
-		Assembly assembly = Assembly.Load ("Assembly-CSharp");
-		Type type = assembly.GetType (ClassName);
-		if (type != null) {
-			System.Object lastVersionObject = Activator.CreateInstance (type);
-			FieldInfo fieldInfo = type.GetField ("version");
-			string lastVersion = (string)fieldInfo.GetValue (lastVersionObject);
-			if (lastVersion != bundleVersion) {
-				Debug.Log ("Found new bundle version " + bundleVersion + " replacing code from previous version " + lastVersion + " in file \"" + TargetCodeFile + "\"");
-				CreateNewBuildVersionClassFile (bundleVersion);
-			}
+		if (trackedMode) {
+			generator = new TrackedBundleVersionGenerator (ClassName, bundleVersion);
 		} else {
-			Debug.Log ("Very first call creating file \"" + TargetCodeFile + "\"" + " for bundle version " + bundleVersion);
+			generator = new SimpleBundleVersionGenerator (ClassName, bundleVersion);
+		}
+		if (generator.CheckForUpdates ()) {
 			CreateNewBuildVersionClassFile (bundleVersion);
 		}
 	}
@@ -77,7 +90,7 @@ public class BundleVersionChecker
 		}
 		using (StreamWriter writer = new StreamWriter (TargetCodeFile, false)) {
 			try {
-				string code = GenerateCode (bundleVersion);
+				string code = generator.GenerateCode ();
 				writer.WriteLine ("{0}", code);
 			} catch (System.Exception ex) {
 				string msg = " \n" + ex.ToString ();
@@ -87,20 +100,6 @@ public class BundleVersionChecker
 		}
 	}
 	
-	/// <summary>
-	/// Regenerates the code for ClassName with new bundle version id.
-	/// </summary>
-	/// <returns>
-	/// Code to write to file i.e. something like:
-	/// "public class CurrentBundleVersion
-	/// {
-	///     public string version = "0.8.5";
-	/// }"
-	/// 
-	/// </returns>
-	/// <param name='bundleVersion'>
-	/// New bundle version.
-	/// </param>
 	static string GenerateCode (string bundleVersion) {
 		string code = "public class " + ClassName + "\n{\n";
 		code += System.String.Format ("\tpublic string version = \"{0}\";", bundleVersion);
