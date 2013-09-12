@@ -27,7 +27,7 @@ using System.Text.RegularExpressions;
 
 public class TrackedBundleVersionGenerator : AbstractBundleVersionGenerator
 {
-	const string VersionInfoField = "versionInfo";
+	const string Current = "current";
 	const string VersionInfoVersionField = "version";
 	const string HistoryField = "history";
 	
@@ -67,7 +67,7 @@ public class TrackedBundleVersionGenerator : AbstractBundleVersionGenerator
 	}
 	
 	string GetVersionFromLastVersionObject () {
-		object versionInfoObject = GetMember<object> (lastVersionObject, VersionInfoField);
+		object versionInfoObject = GetMember<object> (lastVersionObject, Current);
 		if (versionInfoObject != null) {
 			return GetMember<string> (versionInfoObject, VersionInfoVersionField);
 		}
@@ -102,11 +102,11 @@ public class TrackedBundleVersionGenerator : AbstractBundleVersionGenerator
 		}
 		code += Line (1, "");
 		code += Line (1, "public ArrayList history = new ArrayList ();", 2);
-		code += Line (1, "public TrackedBundleVersionInfo versionInfo = new TrackedBundleVersionInfo (\"" + bundleVersion + 
+		code += Line (1, "public TrackedBundleVersionInfo " + Current + " = new TrackedBundleVersionInfo (\"" + bundleVersion + 
 			"\", " + versionInfoIndex + ");", 2);
 		code += Line (1, "public  " + className + "() {");
 		code += oldVersionsToAdd;
-		code += Line (2, "history.Add (versionInfo);");
+		code += Line (2, "history.Add (" + Current + ");");
 		code += Line (1, "}", 2);
 		code += Line (0, "}");
 		return code;

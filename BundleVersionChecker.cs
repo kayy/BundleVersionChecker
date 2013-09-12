@@ -77,6 +77,7 @@ public class BundleVersionChecker
 		using (StreamWriter writer = new StreamWriter (TargetCodeFile, false)) {
 			try {
 				writer.WriteLine ("{0}", code);
+				AssetDatabase.Refresh (ImportAssetOptions.Default);
 			} catch (System.Exception ex) {
 				string msg = " \n" + ex.ToString ();
 				Debug.LogError (msg);
