@@ -27,42 +27,32 @@ using System.Reflection;
 
 /// <summary>
 /// Editor class for generating a class containing bundle version information to be accessed at runtime.
+/// Magic happens in static constructor which is called from Unity automatically when it detects any changes in 
+/// Assets/ directory structure.
+/// Depending on the flag "trackedMode" (true by default) a tracked or a simple bundle version class is generated.
+/// Tracked means that you have access to older version labels as constants to compare with. 
+/// See the 2 blog postings for a more detailed discussion:
+/// http://www.scio.de/en/blog-a-news/scio-development-blog-en/entry/accessing-bundle-version-in-unity-at-runtime-1
 /// </summary>
 [InitializeOnLoad]
 public class BundleVersionChecker
 {
-	/// <summary>
-	/// If set, version with history tracking will be generated.
-	/// </summary>
-	static bool trackedMode = true;
-
-	/// <summary>
-	/// Target dir for file [ClassName].cs.
-	/// </summary>
-	const string TargetDir = "Assets/Scripts/Config/BundleVersionCheck";
-	
-	/// <summary>
-	/// Class name to use when tracking history is disabled.
-	/// </summary>
-	const string SimpleClassName = "CurrentBundleVersion";
-	/// <summary>
-	/// Class name when history tracking is enabled.
-	/// </summary>
-	const string TrackedClassName = "TrackedBundleVersion";
-	
 	static string ClassName {
-		get { return (trackedMode ? TrackedClassName : SimpleClassName); }
+		get { return (ConfigBundleVersionChecker.trackedMode ? ConfigBundleVersionChecker.TrackedClassName : ConfigBundleVersionChecker.SimpleClassName); }
 	}
 	
 	static string TargetCodeFile { 
-		get { return TargetDir + "/" + ClassName + ".cs"; }
+		get { return ConfigBundleVersionChecker.TargetDir + "/" + ClassName + ".cs"; }
 	}
 	
 	static AbstractBundleVersionGenerator generator;
 	
+	/// <summary>
+	/// Class attribute [InitializeOnLoad] triggers calling the static constructor on every refresh.
+	/// </summary>
 	static BundleVersionChecker () {
 		string bundleVersion = PlayerSettings.bundleVersion;
-		if (trackedMode) {
+		if (ConfigBundleVersionChecker.trackedMode) {
 			generator = new TrackedBundleVersionGenerator (ClassName, bundleVersion);
 		} else {
 			generator = new SimpleBundleVersionGenerator (ClassName, bundleVersion);
@@ -79,20 +69,13 @@ public class BundleVersionChecker
 	/// New bundle version to write into code.
 	/// </param>
 	static void CreateNewBuildVersionClassFile (string bundleVersion) {
-		if (File.Exists (TargetDir)) {
-			Debug.LogWarning (TargetDir + " is a file instead of a directory !");
-			return;
-		} else if (!Directory.Exists (TargetDir)) {
-			try {
-				Directory.CreateDirectory (TargetDir);
-			} catch (System.Exception ex) {
-				Debug.LogWarning (ex.Message);
-				throw ex;
-			}
+		string code = generator.GenerateCode ();
+		if (System.String.IsNullOrEmpty (code)) {
+			Log.Debug ("Code generation stopped, no code to write.");
 		}
+		CheckOrCreateDirectory (ConfigBundleVersionChecker.TargetDir);
 		using (StreamWriter writer = new StreamWriter (TargetCodeFile, false)) {
 			try {
-				string code = generator.GenerateCode ();
 				writer.WriteLine ("{0}", code);
 			} catch (System.Exception ex) {
 				string msg = " \n" + ex.ToString ();
@@ -102,4 +85,32 @@ public class BundleVersionChecker
 		}
 	}
 	
+	static void CheckOrCreateDirectory (string dir) {
+		if (File.Exists (dir)) {
+			Debug.LogWarning (dir + " is a file instead of a directory !");
+			return;
+		} else if (!Directory.Exists (dir)) {
+			try {
+				Directory.CreateDirectory (dir);
+			} catch (System.Exception ex) {
+				Debug.LogWarning (ex.Message);
+				throw ex;
+			}
+		}
+	}
+
+	public static bool CopyTrackedBundleVersionInfo () {
+		if (!File.Exists (ConfigBundleVersionChecker.TrackedBundleVersionInfoTarget)) {
+			CheckOrCreateDirectory (ConfigBundleVersionChecker.TargetDir);
+			string srcPath = ConfigBundleVersionChecker.TrackedBundleVersionInfoTemplate;
+			if (File.Exists (srcPath)) {
+				File.Copy (srcPath, ConfigBundleVersionChecker.TrackedBundleVersionInfoTarget, true);
+				Log.Temp ("FOUND " + srcPath);
+			} else {
+				Debug.LogWarning ("File not found " + srcPath);
+				return false;
+			}
+		}
+		return true;
+	}
 }

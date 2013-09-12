@@ -25,17 +25,23 @@ using System.IO;
 using System.Reflection;
 using System.Collections;
 
+/// <summary>
+/// Generates a simple class CurrentBundleVersion when bundleVersion has changed:
+/// public class CurrentBundleVersion
+/// {
+/// 	public string version = "0.8.5";
+/// }
+/// </summary>
 public class SimpleBundleVersionGenerator : AbstractBundleVersionGenerator
 {
+	const string VersionField = "version";
 	
 	public SimpleBundleVersionGenerator (string className, string bundleVersion) : base (className, bundleVersion) {
-		
 	}
 	
 	protected override bool CheckForUpdatesFromClass () {
-		FieldInfo fieldInfo = lastVersionObject.GetType ().GetField ("version");
-		if (fieldInfo != null) {
-			version = (string)fieldInfo.GetValue (lastVersionObject);
+		version = GetMember<string> (lastVersionObject, VersionField);
+		if (version != null) {
 			if (version == bundleVersion) {
 				return false;
 			}

@@ -24,14 +24,32 @@ using System;
 using System.IO;
 using System.Reflection;
 
+/// <summary>
+/// Base class for bundle version generators providing interfaces to:
+/// 1.) load and look up version info -> CheckForUpdates ().
+/// 2.) generate code if necessary i.e. newer bundle version or not found on very first start i.e. there is type 
+///     "className" in assembly
+/// This and all derived classes have to take care to never reference its generated types in code directly. This is 
+/// because at very first start after installation, there are several classes not defined as they are not yet generated.
+/// So when dealing with generated classes always use reflection and native types.
+/// </summary>
 public abstract class AbstractBundleVersionGenerator
 {
+	/// <summary>
+	/// The name of the version class to look up its version info by reflection.
+	/// </summary>
 	protected string className;
-	
-	protected System.Object lastVersionObject;
-	
+	/// <summary>
+	/// The last version object of type "className" instantiated at start. Used to look up "version".
+	/// </summary>
+	protected object lastVersionObject;
+	/// <summary>
+	/// Current bundle version read from PlayerSettings.bundleVersion.
+	/// </summary>
 	protected string bundleVersion;
-	
+	/// <summary>
+	/// The version found in className instance.
+	/// </summary>
 	protected string version = "";
 	
 	protected AbstractBundleVersionGenerator (string className, string bundleVersion) {
@@ -60,15 +78,63 @@ public abstract class AbstractBundleVersionGenerator
 	/// }"
 	/// </returns>
 	public abstract string GenerateCode ();
-
-	public bool CheckForUpdates () {
-		Assembly assembly = Assembly.Load ("Assembly-CSharp");
-		Type type = assembly.GetType (className);
-		if (type != null) {
-			lastVersionObject = Activator.CreateInstance (type);
-			if (lastVersionObject != null) {
-				return CheckForUpdatesFromClass ();
+	
+	/// <summary>
+	/// Retrieve member called "name" from object via reflection.
+	/// </summary>
+	/// <returns>
+	/// Member or default (T) i.e. null or 0.
+	/// </returns>
+	/// <param name='o'>
+	/// Object to inspect.
+	/// </param>
+	/// <param name='name'>
+	/// Name of the field.
+	/// </param>
+	/// <typeparam name='T'>
+	/// Type of member.
+	/// </typeparam>
+	protected T GetMember<T> (object o, string name) {
+		if (o != null) {
+			FieldInfo fieldInfo = o.GetType ().GetField (name);
+			if (fieldInfo != null) {
+				return (T)fieldInfo.GetValue (o);
 			}
+		}
+		return default (T);
+	}
+	
+	/// <summary>
+	/// Creates an instance of "name" provided that "name" has a public constructor with no arguments.
+	/// </summary>
+	/// <returns>
+	/// The instance or null.
+	/// </returns>
+	/// <param name='name'>
+	/// Class name.
+	/// </param>
+	/// <param name='assemblyName'>
+	/// "Assembly-CSharp" if not specified
+	/// </param>
+	protected object CreateInstance (string name, string assemblyName = "Assembly-CSharp") {
+		Assembly assembly = Assembly.Load (assemblyName);
+		Type type = assembly.GetType (name);
+		if (type != null) {
+			return Activator.CreateInstance (type);
+		}
+		return null;
+	}
+	
+	/// <summary>
+	/// Checks if an update of bundle version class is required.
+	/// </summary>
+	/// <returns>
+	/// true if regeneration of version class is necessary.
+	/// </returns>
+	public bool CheckForUpdates () {
+		lastVersionObject = CreateInstance (className);
+		if (lastVersionObject != null) {
+			return CheckForUpdatesFromClass ();
 		}
 		Debug.Log ("Very first call, class file \"" + className + "\".cs" + " not yet generated.");
 		return true;

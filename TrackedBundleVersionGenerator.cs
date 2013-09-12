@@ -27,11 +27,29 @@ using System.Text.RegularExpressions;
 
 public class TrackedBundleVersionGenerator : AbstractBundleVersionGenerator
 {
+	const string VersionInfoField = "versionInfo";
+	const string VersionInfoVersionField = "version";
+	const string HistoryField = "history";
 	
 	public TrackedBundleVersionGenerator (string className, string bundleVersion) : base (className, bundleVersion) {
 	}
 	
-	string FormatVersionConst (string version) {
+	protected override bool CheckForUpdatesFromClass () {
+		ArrayList history = GetHistoryFromLastVersionObject ();
+		if (history != null && history.Count > 0) {
+			version = GetVersionFromLastVersionObject ();
+			if (version == bundleVersion) {
+				return false;
+			}
+			Debug.Log ("Found new bundle version " + bundleVersion + " replacing code from previous version " + version + " in class \"" + className + "\"");
+			
+		} else {
+			Debug.LogWarning ("Field \"history\" is null or does not contain any elements in " + lastVersionObject);
+		}
+		return true;
+	}
+	
+	string FormatVersionConstantNames (string version) {
 		string trimmed = version.Trim ();
 		string noDots = trimmed.Replace (".", "_");
 		string noBlanks = noDots.Replace (" ", "_");
@@ -41,38 +59,31 @@ public class TrackedBundleVersionGenerator : AbstractBundleVersionGenerator
 	}
 	
 	ArrayList GetHistoryFromLastVersionObject () {
-		if (lastVersionObject != null) {
-			FieldInfo fieldInfo = lastVersionObject.GetType ().GetField ("history");
-			if (fieldInfo != null) {
-				return (ArrayList)fieldInfo.GetValue (lastVersionObject);
-			}
-		}
-		return null;
+		return GetMember<ArrayList> (lastVersionObject, HistoryField);
 	}
 	
-	string GetVersionFromVersionInfoObject (System.Object o) {
-		FieldInfo fieldsOfVersonInfoObj = o.GetType ().GetField ("version");
-		if (fieldsOfVersonInfoObj != null) {
-			return (string)fieldsOfVersonInfoObj.GetValue (o);
-		}
-		return null;
+	string GetVersionFromVersionInfoObject (object o) {
+		return GetMember<string> (o, VersionInfoVersionField);
 	}
 	
-	string GetVersionFromVersionInfo () {
-		FieldInfo fieldInfo = lastVersionObject.GetType ().GetField ("versionInfo");
-		if (fieldInfo != null) {
-			System.Object versionInfoObj = (System.Object)fieldInfo.GetValue (lastVersionObject);
-			if (versionInfoObj != null) {
-				FieldInfo fieldsOfVersonInfoObj = versionInfoObj.GetType ().GetField ("version");
-				if (fieldsOfVersonInfoObj != null) {
-					return (string)fieldsOfVersonInfoObj.GetValue (versionInfoObj);
-				}
-			}
+	string GetVersionFromLastVersionObject () {
+		object versionInfoObject = GetMember<object> (lastVersionObject, VersionInfoField);
+		if (versionInfoObject != null) {
+			return GetMember<string> (versionInfoObject, VersionInfoVersionField);
 		}
 		return null;
 	}
 	
 	public override string GenerateCode () {
+		object trackedBundleVersionInfo = CreateInstance ("TrackedBundleVersionInfo");
+		if (trackedBundleVersionInfo == null) {
+			if (BundleVersionChecker.CopyTrackedBundleVersionInfo ()) {
+				Debug.LogError ("TrackedBundleVersionInfo.cs generated successfully.");
+			} else {
+				// doesn't make sense without TrackedBundleVersionInfo
+				return null;
+			}
+		}
 		int versionInfoIndex = 0;
 		ArrayList history = GetHistoryFromLastVersionObject ();
 		string oldVersionsToAdd = "";
@@ -80,9 +91,9 @@ public class TrackedBundleVersionGenerator : AbstractBundleVersionGenerator
 		code += Line (0, "public class " + className);
 		code += Line (0, "{");
 		if (history != null) {
-			foreach (System.Object versionObject in history) {
+			foreach (object versionObject in history) {
 				string trackedVersion = GetVersionFromVersionInfoObject (versionObject);
-				string f = FormatVersionConst (trackedVersion);
+				string f = FormatVersionConstantNames (trackedVersion);
 				code += Line (1, "public static readonly TrackedBundleVersionInfo " + f + 
 					" =  new TrackedBundleVersionInfo (\"" + trackedVersion + "\", " + versionInfoIndex + ");");
 				oldVersionsToAdd += Line (2, "history.Add (" + f + ");");
@@ -101,19 +112,4 @@ public class TrackedBundleVersionGenerator : AbstractBundleVersionGenerator
 		return code;
 	}
 
-	protected override bool CheckForUpdatesFromClass () {
-		ArrayList history = GetHistoryFromLastVersionObject ();
-		if (history != null && history.Count > 0) {
-			version = GetVersionFromVersionInfo ();
-			if (version == bundleVersion) {
-				return false;
-			}
-			Debug.Log ("Found new bundle version " + bundleVersion + " replacing code from previous version " + version + " in class \"" + className + "\"");
-			
-		} else {
-			Debug.LogWarning ("Field \"history\" is null or does not contain any elements in " + lastVersionObject);
-		}
-		return true;
-	}
-	
 }
