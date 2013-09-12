@@ -98,8 +98,8 @@ public class TrackedBundleVersionInfo
 	/// Info2.
 	/// </param>
 	public static int DefaultCompareTo (TrackedBundleVersionInfo info1, TrackedBundleVersionInfo info2) {
-		if (info1 == null || info2 == null) {
-			return (info1 == null ? -1 : 0) + (info2 == null ? 1 : 0);
+		if ((object)info1 == null || (object)info2 == null) {
+			return ((object)info1 == null ? -1 : 0) + ((object)info2 == null ? 1 : 0);
 		}
 		// if both versions are not contained in TrackedBundleVersion.history perform a string compare
 		// otherwise the non-registered is treated as older

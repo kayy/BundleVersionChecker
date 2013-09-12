@@ -136,7 +136,7 @@ public abstract class AbstractBundleVersionGenerator
 		if (lastVersionObject != null) {
 			return CheckForUpdatesFromClass ();
 		}
-		Debug.Log ("Very first call, class file \"" + className + "\".cs" + " not yet generated.");
+		Debug.Log ("Very first call, class file \"" + className + "\".cs" + " will be generated for the first tracked version " + bundleVersion);
 		return true;
 		
 	}

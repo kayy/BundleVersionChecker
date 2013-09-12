@@ -34,7 +34,7 @@ public static class ConfigBundleVersionChecker
 	/// Target dir for file [ClassName].cs and helper classes (if needed). Change this to the location where you want 
 	/// the class(es) to be generated.
 	/// </summary>
-	public const string TargetDir = "Assets/Scripts/Config/BundleVersionCheck";
+	public const string TargetDir = "Assets/Scripts/Config/Generated";
 	
 	/// <summary>
 	/// Dir where templates are found.

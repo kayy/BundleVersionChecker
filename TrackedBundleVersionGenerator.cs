@@ -77,9 +77,7 @@ public class TrackedBundleVersionGenerator : AbstractBundleVersionGenerator
 	public override string GenerateCode () {
 		object trackedBundleVersionInfo = CreateInstance ("TrackedBundleVersionInfo");
 		if (trackedBundleVersionInfo == null) {
-			if (BundleVersionChecker.CopyTrackedBundleVersionInfo ()) {
-				Debug.LogError ("TrackedBundleVersionInfo.cs generated successfully.");
-			} else {
+			if (!BundleVersionChecker.CopyTrackedBundleVersionInfo ()) {
 				// doesn't make sense without TrackedBundleVersionInfo
 				return null;
 			}
