@@ -106,7 +106,7 @@ public class BundleVersionChecker
 			string srcPath = ConfigBundleVersionChecker.TrackedBundleVersionInfoTemplate;
 			if (File.Exists (srcPath)) {
 				File.Copy (srcPath, ConfigBundleVersionChecker.TrackedBundleVersionInfoTarget, true);
-				Log.Temp ("Successfully copied template for class TrackedBundleVersionInfo to " + ConfigBundleVersionChecker.TrackedBundleVersionInfoTarget);
+				Debug.Log ("Successfully copied template for class TrackedBundleVersionInfo to " + ConfigBundleVersionChecker.TrackedBundleVersionInfoTarget);
 			} else {
 				Debug.LogWarning ("File not found " + srcPath);
 				return false;

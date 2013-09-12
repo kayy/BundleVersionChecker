@@ -70,17 +70,52 @@ public class TrackedBundleVersionInfo
 		return compareTo (info1, info2) <= 0;
 	}
 	
-	/// <summary>
-	/// Default constructor supposed to called only when object is instantiated via reflection i.e. Activator.CreateInstance.
-	/// </summary>
-	public TrackedBundleVersionInfo () {
-		this.version = "";
-		this.index = -1;
+	public static bool operator == (TrackedBundleVersionInfo info1, string info2) {
+		return System.String.Compare (info1.version, info2) == 0;
 	}
 	
-	public TrackedBundleVersionInfo (string version, int index = -1) {
-		this.version = version;
-		this.index = index;
+	public static bool operator == (string info1, TrackedBundleVersionInfo info2) {
+		return System.String.Compare (info1, info2.version) == 0;
+	}
+	
+	public static bool operator != (TrackedBundleVersionInfo info1, string info2) {
+		return System.String.Compare (info1.version, info2) != 0;
+	}
+	
+	public static bool operator != (string info1, TrackedBundleVersionInfo info2) {
+		return System.String.Compare (info1, info2.version) != 0;
+	}
+	
+	public static bool operator > (TrackedBundleVersionInfo info1, string info2) {
+		return System.String.Compare (info1.version, info2) > 0;
+	}
+	
+	public static bool operator > (string info1, TrackedBundleVersionInfo info2) {
+		return System.String.Compare (info1, info2.version) > 0;
+	}
+	
+	public static bool operator < (TrackedBundleVersionInfo info1, string info2) {
+		return System.String.Compare (info1.version, info2) < 0;
+	}
+	
+	public static bool operator < (string info1, TrackedBundleVersionInfo info2) {
+		return System.String.Compare (info1, info2.version) < 0;
+	}
+	
+	public static bool operator >= (TrackedBundleVersionInfo info1, string info2) {
+		return System.String.Compare (info1.version, info2) >= 0;
+	}
+	
+	public static bool operator >= (string info1, TrackedBundleVersionInfo info2) {
+		return System.String.Compare (info1, info2.version) >= 0;
+	}
+	
+	public static bool operator <= (TrackedBundleVersionInfo info1, string info2) {
+		return System.String.Compare (info1.version, info2) <= 0;
+	}
+	
+	public static bool operator <= (string info1, TrackedBundleVersionInfo info2) {
+		return System.String.Compare (info1, info2.version) <= 0;
 	}
 	
 	/// <summary>
@@ -114,6 +149,29 @@ public class TrackedBundleVersionInfo
 		}
 	}
 	
+	/// <summary>
+	/// Default constructor supposed to called only when object is instantiated via reflection i.e. Activator.CreateInstance.
+	/// </summary>
+	public TrackedBundleVersionInfo () {
+		this.version = "";
+		this.index = -1;
+	}
+	
+	/// <summary>
+	/// Can be used to create an instance manually if it is definitely before tracking in TrackedBundleVersion has 
+	/// started. Best use is to check history if there is an entry.
+	/// </summary>
+	/// <param name='version'>
+	/// Version.
+	/// </param>
+	/// <param name='index'>
+	/// Index, default is -1.
+	/// </param>
+	public TrackedBundleVersionInfo (string version, int index = -1) {
+		this.version = version;
+		this.index = index;
+	}
+	
 	public bool AtLeast (TrackedBundleVersionInfo info2) {
 		return compareTo (this, info2) >= 0;
 	}
@@ -138,6 +196,4 @@ public class TrackedBundleVersionInfo
 	}
 	
 }
-
-
 

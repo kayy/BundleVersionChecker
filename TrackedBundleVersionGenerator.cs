@@ -106,7 +106,7 @@ public class TrackedBundleVersionGenerator : AbstractBundleVersionGenerator
 		code += oldVersionsToAdd;
 		code += Line (2, "history.Add (" + Current + ");");
 		code += Line (1, "}", 2);
-		code += Line (0, "}");
+		code +=  "}";
 		return code;
 	}
 
