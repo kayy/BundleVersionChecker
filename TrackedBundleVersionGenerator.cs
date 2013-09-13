@@ -31,7 +31,8 @@ public class TrackedBundleVersionGenerator : AbstractBundleVersionGenerator
 	const string VersionInfoVersionField = "version";
 	const string HistoryField = "history";
 	
-	public TrackedBundleVersionGenerator (string className, string bundleVersion) : base (className, bundleVersion) {
+	public TrackedBundleVersionGenerator (string className, string bundleVersion, string bundleIdentifier) : 
+		base (className, bundleVersion, bundleIdentifier) {
 	}
 	
 	protected override bool CheckForUpdatesFromClass () {
@@ -88,6 +89,7 @@ public class TrackedBundleVersionGenerator : AbstractBundleVersionGenerator
 		string code = Line (0, "using System.Collections;", 2);
 		code += Line (0, "public class " + className);
 		code += Line (0, "{");
+		code += Line (1, "public static readonly string bundleIdentifier = \"" + bundleIdentifier + "\";", 2);
 		if (history != null) {
 			foreach (object versionObject in history) {
 				string trackedVersion = GetVersionFromVersionInfoObject (versionObject);
@@ -106,7 +108,7 @@ public class TrackedBundleVersionGenerator : AbstractBundleVersionGenerator
 		code += oldVersionsToAdd;
 		code += Line (2, "history.Add (" + Current + ");");
 		code += Line (1, "}", 2);
-		code +=  "}";
+		code += "}";
 		return code;
 	}
 

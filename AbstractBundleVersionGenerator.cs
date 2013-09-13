@@ -48,11 +48,16 @@ public abstract class AbstractBundleVersionGenerator
 	/// </summary>
 	protected string bundleVersion;
 	/// <summary>
+	/// The bundle identifier read from PlayerSettings.bundleIdentifier.
+	/// </summary>
+	protected string bundleIdentifier;
+	/// <summary>
 	/// The version found in className instance.
 	/// </summary>
 	protected string version = "";
 	
-	protected AbstractBundleVersionGenerator (string className, string bundleVersion) {
+	protected AbstractBundleVersionGenerator (string className, string bundleVersion, string bundleIdentifier) {
+		this.bundleIdentifier = bundleIdentifier;
 		this.className = className;
 		this.bundleVersion = bundleVersion;
 	}

@@ -36,7 +36,8 @@ public class SimpleBundleVersionGenerator : AbstractBundleVersionGenerator
 {
 	const string VersionField = "version";
 	
-	public SimpleBundleVersionGenerator (string className, string bundleVersion) : base (className, bundleVersion) {
+	public SimpleBundleVersionGenerator (string className, string bundleVersion, string bundleIdentifier) : 
+		base (className, bundleVersion, bundleIdentifier) {
 	}
 	
 	protected override bool CheckForUpdatesFromClass () {
@@ -55,6 +56,7 @@ public class SimpleBundleVersionGenerator : AbstractBundleVersionGenerator
 	public override string GenerateCode () {
 		string code = Line (0, "public class " + className);
 		code += Line (0, "{");
+		code += Line (1, "public static readonly string bundleIdentifier = \"" + bundleIdentifier + "\";", 2);
 		code += Line (1, "\tpublic string version = \"" + bundleVersion + "\";");
 		code += Line (0, "}");
 		return code;

@@ -52,10 +52,11 @@ public class BundleVersionChecker
 	/// </summary>
 	static BundleVersionChecker () {
 		string bundleVersion = PlayerSettings.bundleVersion;
+		string bundleIdentifier = PlayerSettings.bundleIdentifier;
 		if (ConfigBundleVersionChecker.trackedMode) {
-			generator = new TrackedBundleVersionGenerator (ClassName, bundleVersion);
+			generator = new TrackedBundleVersionGenerator (ClassName, bundleVersion, bundleIdentifier);
 		} else {
-			generator = new SimpleBundleVersionGenerator (ClassName, bundleVersion);
+			generator = new SimpleBundleVersionGenerator (ClassName, bundleVersion, bundleIdentifier);
 		}
 		if (generator.CheckForUpdates ()) {
 			CreateNewBuildVersionClassFile (bundleVersion);
