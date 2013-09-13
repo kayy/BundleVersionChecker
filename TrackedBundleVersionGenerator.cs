@@ -100,6 +100,9 @@ public class TrackedBundleVersionGenerator : AbstractBundleVersionGenerator
 				versionInfoIndex++;
 			}
 		}
+		// Add a constant for the current label too:
+		code += Line (1, "public static readonly TrackedBundleVersionInfo " + FormatVersionConstantNames (bundleVersion) + 
+					" =  new TrackedBundleVersionInfo (\"" + bundleVersion + "\", " + versionInfoIndex + ");");
 		code += Line (1, "");
 		code += Line (1, "public ArrayList history = new ArrayList ();", 2);
 		code += Line (1, "public TrackedBundleVersionInfo " + Current + " = new TrackedBundleVersionInfo (\"" + bundleVersion + 
