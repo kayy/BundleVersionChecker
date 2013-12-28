@@ -72,7 +72,7 @@ public class BundleVersionChecker
 	static void CreateNewBuildVersionClassFile (string bundleVersion) {
 		string code = generator.GenerateCode ();
 		if (System.String.IsNullOrEmpty (code)) {
-			Log.Debug ("Code generation stopped, no code to write.");
+			Debug.Log ("Code generation stopped, no code to write.");
 		}
 		CheckOrCreateDirectory (ConfigBundleVersionChecker.TargetDir);
 		using (StreamWriter writer = new StreamWriter (TargetCodeFile, false)) {
