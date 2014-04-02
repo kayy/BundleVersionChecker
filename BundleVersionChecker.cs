@@ -75,15 +75,19 @@ public class BundleVersionChecker
 			Debug.Log ("Code generation stopped, no code to write.");
 		}
 		CheckOrCreateDirectory (ConfigBundleVersionChecker.TargetDir);
+		bool success = false;
 		using (StreamWriter writer = new StreamWriter (TargetCodeFile, false)) {
 			try {
 				writer.WriteLine ("{0}", code);
-				AssetDatabase.Refresh (ImportAssetOptions.Default);
+				success = true;
 			} catch (System.Exception ex) {
 				string msg = " \n" + ex.ToString ();
 				Debug.LogError (msg);
 				EditorUtility.DisplayDialog ("Error when trying to regenerate file " + TargetCodeFile, msg, "OK");
 			}
+		}
+		if (success) {
+			AssetDatabase.Refresh (ImportAssetOptions.Default);
 		}
 	}
 	
