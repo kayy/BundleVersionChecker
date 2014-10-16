@@ -159,4 +159,3 @@ public abstract class AbstractBundleVersionGenerator
 	}
 	
 }
-

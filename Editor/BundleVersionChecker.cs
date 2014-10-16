@@ -59,17 +59,18 @@ public class BundleVersionChecker
 			generator = new SimpleBundleVersionGenerator (ClassName, bundleVersion, bundleIdentifier);
 		}
 		if (generator.CheckForUpdates ()) {
-			CreateNewBuildVersionClassFile (bundleVersion);
+            CreateNewBuildVersionClassFile(generator);
 		}
 	}
-	
+
 	/// <summary>
 	/// Creates the new class file for ClassName.cs regardless if there is an existing one or not.
 	/// </summary>
-	/// <param name='bundleVersion'>
-	/// New bundle version to write into code.
+	/// <param name='generator'>
+	/// Generator object to use.
 	/// </param>
-	static void CreateNewBuildVersionClassFile (string bundleVersion) {
+    public static void CreateNewBuildVersionClassFile(AbstractBundleVersionGenerator generator)
+    {
 		string code = generator.GenerateCode ();
 		if (System.String.IsNullOrEmpty (code)) {
 			Debug.Log ("Code generation stopped, no code to write.");

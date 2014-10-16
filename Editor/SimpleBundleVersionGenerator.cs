@@ -57,7 +57,7 @@ public class SimpleBundleVersionGenerator : AbstractBundleVersionGenerator
 		string code = Line (0, "public class " + className);
 		code += Line (0, "{");
 		code += Line (1, "public static readonly string bundleIdentifier = \"" + bundleIdentifier + "\";", 2);
-		code += Line (1, "\tpublic string version = \"" + bundleVersion + "\";");
+		code += Line (1, "public static string version = \"" + bundleVersion + "\";");
 		code += Line (0, "}");
 		return code;
 	}

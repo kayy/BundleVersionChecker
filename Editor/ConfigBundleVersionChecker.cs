@@ -39,7 +39,7 @@ public static class ConfigBundleVersionChecker
 	/// <summary>
 	/// Dir where templates are found.
 	/// </summary>
-	public const string EditorSourceDir = "Assets/Editor/BundleVersionChecker";
+	public const string EditorSourceDir = "Assets/Editor/BundleVersionChecker/Editor";
 
 	/// <summary>
 	/// Class name to use when tracking history is disabled.
