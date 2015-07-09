@@ -18,7 +18,7 @@
 // COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
+using UnityEngine;
 
 /// <summary>
 /// Configuration constants for BundleVersionChecker and generator classes.
@@ -31,16 +31,15 @@ public static class ConfigBundleVersionChecker
 	public static bool trackedMode = true;
 
 	/// <summary>
-	/// Target dir for file [ClassName].cs and helper classes (if needed). Change this to the location where you want 
-	/// the class(es) to be generated.
+	/// Dir where templates are found.
 	/// </summary>
-	public const string TargetDir = "Assets/Scripts/Config/Generated";
+	public const string TemplateFileDirectorySearchPattern = "/BundleVersionChecker/Editor/";
 	
 	/// <summary>
 	/// Dir where templates are found.
 	/// </summary>
-	public const string EditorSourceDir = "Assets/Editor/BundleVersionChecker/Editor";
-
+	public const string TemplateFileSearchPattern = TrackedBundleVersionInfoName + ".txt";
+	
 	/// <summary>
 	/// Class name to use when tracking history is disabled.
 	/// </summary>
@@ -57,11 +56,28 @@ public static class ConfigBundleVersionChecker
 	/// </summary>
 	public const string TrackedBundleVersionInfoName = "TrackedBundleVersionInfo";
 	
+	/// <summary>
+	/// Target dir for file [ClassName].cs and helper classes (if needed). Change this to the location where you want 
+	/// the class(es) to be generated.
+	/// </summary>
+	public static string TargetDir {
+		get { return PlayerPrefs.GetString ("BundleVersionChecker.TargetDir"); }
+	}
+	
 	public static string TrackedBundleVersionInfoTemplate {
-		get { return EditorSourceDir + "/" + TrackedBundleVersionInfoName + ".txt";}
+		get { 
+			string templateDir = PlayerPrefs.GetString ("BundleVersionChecker.TemplateDir");
+			return templateDir + "/" + TrackedBundleVersionInfoName + ".txt";
+		}
 	}
 	public static string TrackedBundleVersionInfoTarget {
-		get { return TargetDir + "/" + TrackedBundleVersionInfoName + ".cs";}
+		get { 
+			return TargetDir + "/" + TrackedBundleVersionInfoName + ".cs";
+		}
+	}
+
+	static ConfigBundleVersionChecker ()
+	{
 	}
 }
 

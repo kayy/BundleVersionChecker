@@ -53,6 +53,28 @@ public class BundleVersionChecker
 	static BundleVersionChecker () {
 		string bundleVersion = PlayerSettings.bundleVersion;
 		string bundleIdentifier = PlayerSettings.bundleIdentifier;
+		string targetDir = PlayerPrefs.GetString ("BundleVersionChecker.TargetDir");
+		if (string.IsNullOrEmpty (targetDir) || !Directory.Exists (targetDir)) {
+			targetDir = EditorUtility.SaveFolderPanel ("Target Folder For Generated Classes", Application.dataPath, "Generated");
+			if (!string.IsNullOrEmpty (targetDir)) {
+				PlayerPrefs.SetString ("BundleVersionChecker.TargetDir", targetDir);
+			} else {
+				return;
+			}
+		}
+		string templateDir = PlayerPrefs.GetString ("BundleVersionChecker.TemplateDir");
+		if (string.IsNullOrEmpty (templateDir) || !Directory.Exists (templateDir)) {
+			Debug.Log (string.Format("Search : {0}  {1}  {2}", Application.dataPath, ConfigBundleVersionChecker.TemplateFileSearchPattern, SearchOption.AllDirectories));
+			string[] files = Directory.GetFiles (Application.dataPath, ConfigBundleVersionChecker.TemplateFileSearchPattern, SearchOption.AllDirectories);
+			if (files != null && files.Length == 1) {
+				templateDir = Path.GetDirectoryName (files[0]);
+				PlayerPrefs.SetString ("BundleVersionChecker.TemplateDir", templateDir);
+			} else {
+				Debug.LogWarning ("Could not find template at relative path " + ConfigBundleVersionChecker.TemplateFileSearchPattern + 
+				                  "! Please check your installation of BundleVersionChecker. Reinstall it if there is no such file");
+				return;
+			}
+		}
 		if (ConfigBundleVersionChecker.trackedMode) {
 			generator = new TrackedBundleVersionGenerator (ClassName, bundleVersion, bundleIdentifier);
 		} else {
@@ -107,16 +129,17 @@ public class BundleVersionChecker
 	}
 
 	public static bool CopyTrackedBundleVersionInfo () {
-		if (!File.Exists (ConfigBundleVersionChecker.TrackedBundleVersionInfoTarget)) {
-			CheckOrCreateDirectory (ConfigBundleVersionChecker.TargetDir);
-			string srcPath = ConfigBundleVersionChecker.TrackedBundleVersionInfoTemplate;
-			if (File.Exists (srcPath)) {
-				File.Copy (srcPath, ConfigBundleVersionChecker.TrackedBundleVersionInfoTarget, true);
+		CheckOrCreateDirectory (ConfigBundleVersionChecker.TargetDir);
+		string srcPath = ConfigBundleVersionChecker.TrackedBundleVersionInfoTemplate;
+		if (File.Exists (srcPath)) {
+			bool overwriteTarget = !File.Exists ("ConfigBundleVersionChecker.TrackedBundleVersionInfoTarget");
+			File.Copy (srcPath, ConfigBundleVersionChecker.TrackedBundleVersionInfoTarget, true);
+			if (overwriteTarget) {
 				Debug.Log ("Successfully copied template for class TrackedBundleVersionInfo to " + ConfigBundleVersionChecker.TrackedBundleVersionInfoTarget);
-			} else {
-				Debug.LogWarning ("File not found " + srcPath);
-				return false;
 			}
+		} else {
+			Debug.LogWarning ("File not found " + srcPath);
+			return false;
 		}
 		return true;
 	}

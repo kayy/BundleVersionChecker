@@ -76,8 +76,9 @@ public class TrackedBundleVersionGenerator : AbstractBundleVersionGenerator
 	}
 	
 	public override string GenerateCode () {
-		object trackedBundleVersionInfo = CreateInstance ("TrackedBundleVersionInfo");
-		if (trackedBundleVersionInfo == null) {
+		object trackedBundleVersionInfoObject = CreateInstance ("TrackedBundleVersionInfo");
+		if (trackedBundleVersionInfoObject == null) {
+			// we are creating TrackedBundleVersion.cs the very first time
 			if (!BundleVersionChecker.CopyTrackedBundleVersionInfo ()) {
 				// doesn't make sense without TrackedBundleVersionInfo
 				return null;
@@ -87,9 +88,12 @@ public class TrackedBundleVersionGenerator : AbstractBundleVersionGenerator
 		ArrayList history = GetHistoryFromLastVersionObject ();
 		string oldVersionsToAdd = "";
 		string code = Line (0, "using System.Collections;", 2);
+		code += Line (0, "// GENERATED CODE.");
 		code += Line (0, "public class " + className);
 		code += Line (0, "{");
 		code += Line (1, "public static readonly string bundleIdentifier = \"" + bundleIdentifier + "\";", 2);
+		string currentVersionInfoName = null;
+		int currentVersionInfoIndex = -1;
 		if (history != null) {
 			foreach (object versionObject in history) {
 				string trackedVersion = GetVersionFromVersionInfoObject (versionObject);
@@ -97,19 +101,32 @@ public class TrackedBundleVersionGenerator : AbstractBundleVersionGenerator
 				code += Line (1, "public static readonly TrackedBundleVersionInfo " + f + 
 					" =  new TrackedBundleVersionInfo (\"" + trackedVersion + "\", " + versionInfoIndex + ");");
 				oldVersionsToAdd += Line (2, "history.Add (" + f + ");");
+				if (trackedVersion == bundleVersion) {
+					currentVersionInfoName = f;
+					currentVersionInfoIndex = versionInfoIndex;
+				}
 				versionInfoIndex++;
 			}
 		}
-		// Add a constant for the current label too:
-		code += Line (1, "public static readonly TrackedBundleVersionInfo " + FormatVersionConstantNames (bundleVersion) + 
-					" =  new TrackedBundleVersionInfo (\"" + bundleVersion + "\", " + versionInfoIndex + ");");
+		if (currentVersionInfoIndex < 0 || currentVersionInfoName == null) {
+			// Add a constant for the current label too:
+			currentVersionInfoName = FormatVersionConstantNames (bundleVersion);
+			code += Line (1, "public static readonly TrackedBundleVersionInfo " + currentVersionInfoName + 
+				" =  new TrackedBundleVersionInfo (\"" + bundleVersion + "\", " + versionInfoIndex + ");");
+			currentVersionInfoIndex = versionInfoIndex;
+		}
 		code += Line (1, "");
+		code += Line (1, "public static readonly TrackedBundleVersion Instance = new TrackedBundleVersion ();", 2);
+		code += Line (1, "public static TrackedBundleVersionInfo Current { get { return Instance.current; } }", 2);
 		code += Line (1, "public ArrayList history = new ArrayList ();", 2);
-		code += Line (1, "public TrackedBundleVersionInfo " + Current + " = new TrackedBundleVersionInfo (\"" + bundleVersion + 
-			"\", " + versionInfoIndex + ");", 2);
+		code += Line (1, "public TrackedBundleVersionInfo " + Current + " = " + currentVersionInfoName + ";", 2);
 		code += Line (1, "public  " + className + "() {");
 		code += oldVersionsToAdd;
-		code += Line (2, "history.Add (" + Current + ");");
+		if (currentVersionInfoIndex == versionInfoIndex) {
+			// default case: current version is the most recent so it is not yet contained in history; 
+			// after a version number rollback the current entry is already contained in history
+			code += Line (2, "history.Add (" + Current + ");");
+		}
 		code += Line (1, "}", 2);
 		code += "}";
 		return code;

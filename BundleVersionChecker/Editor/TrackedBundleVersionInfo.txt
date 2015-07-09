@@ -141,7 +141,7 @@ public class TrackedBundleVersionInfo
 		// if both versions are not contained in TrackedBundleVersion.history perform a string compare
 		// otherwise the non-registered is treated as older
 		if (info1.index < 0 && info2.index < 0) {
-			return System.String.Compare (info1.version, info2.version);
+			return StringBasedCompareTo (info1, info2);
 		// NOTE: we rely on index only; if history is manipulated manually this will lead to problems;
 		// Provide a customised version and set it to static member compareTo
 		} else if (info1.index > info2.index) {
@@ -151,6 +151,13 @@ public class TrackedBundleVersionInfo
 		} else {
 			return 0;
 		}
+	}
+
+	public static int StringBasedCompareTo (TrackedBundleVersionInfo info1, TrackedBundleVersionInfo info2)
+	{
+		System.Version v1 = new System.Version (info1.version);
+		System.Version v2 = new System.Version (info2.version);
+		return v1.CompareTo (v2);
 	}
 	
 	/// <summary>
