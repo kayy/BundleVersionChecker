@@ -19,6 +19,7 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 using UnityEngine;
+using UnityEditor;
 using System;
 using System.IO;
 using System.Reflection;
@@ -118,6 +119,9 @@ public class TrackedBundleVersionGenerator : AbstractBundleVersionGenerator
 		code += Line (1, "");
 		code += Line (1, "public static readonly TrackedBundleVersion Instance = new TrackedBundleVersion ();", 2);
 		code += Line (1, "public static TrackedBundleVersionInfo Current { get { return Instance.current; } }", 2);
+		// TODO_kay: Workaround to get current Android bundleVersionCode, provide historic information in the future
+		code += Line (1, "public static int CurrentAndroidBundleVersionCode { get { return " + PlayerSettings.Android.bundleVersionCode + "; } }", 2);
+
 		code += Line (1, "public ArrayList history = new ArrayList ();", 2);
 		code += Line (1, "public TrackedBundleVersionInfo " + Current + " = " + currentVersionInfoName + ";", 2);
 		code += Line (1, "public  " + className + "() {");
