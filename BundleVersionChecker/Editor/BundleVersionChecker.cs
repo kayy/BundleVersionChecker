@@ -55,17 +55,25 @@ public class BundleVersionChecker
 		string bundleIdentifier = PlayerSettings.bundleIdentifier;
 		string targetDir = PlayerPrefs.GetString ("BundleVersionChecker.TargetDir");
 		if (string.IsNullOrEmpty (targetDir) || !Directory.Exists (targetDir)) {
-			targetDir = EditorUtility.SaveFolderPanel ("Target Folder For Generated Classes", Application.dataPath, "Generated");
-			if (!string.IsNullOrEmpty (targetDir)) {
+			string[] files = Directory.GetFiles (Application.dataPath, ConfigBundleVersionChecker.TrackedClassName + ".cs", SearchOption.AllDirectories);
+			if (files != null && files.Length == 1) {
+				targetDir = Path.GetDirectoryName (files[0]);
+				Debug.Log (string.Format("Found previous version of {0} in directory {1}. This will be used for future generation.", ConfigBundleVersionChecker.TrackedClassName, targetDir));
 				PlayerPrefs.SetString ("BundleVersionChecker.TargetDir", targetDir);
+				PlayerPrefs.Save ();
 			} else {
-				return;
+				targetDir = EditorUtility.SaveFolderPanel ("Target Folder For Generated Classes", Application.dataPath, "Generated");
+				if (!string.IsNullOrEmpty (targetDir)) {
+					PlayerPrefs.SetString ("BundleVersionChecker.TargetDir", targetDir);
+				} else {
+					return;
+				}
 			}
 		}
 		string templateDir = PlayerPrefs.GetString ("BundleVersionChecker.TemplateDir");
 		if (string.IsNullOrEmpty (templateDir) || !Directory.Exists (templateDir)) {
-			Debug.Log (string.Format("Search : {0}  {1}  {2}", Application.dataPath, ConfigBundleVersionChecker.TemplateFileSearchPattern, SearchOption.AllDirectories));
 			string[] files = Directory.GetFiles (Application.dataPath, ConfigBundleVersionChecker.TemplateFileSearchPattern, SearchOption.AllDirectories);
+//			Debug.Log (string.Format("Search : {0} found : {1}", Application.dataPath, (files != null && files.Length > 0 ? files[0] : "(none)")));
 			if (files != null && files.Length == 1) {
 				templateDir = Path.GetDirectoryName (files[0]);
 				PlayerPrefs.SetString ("BundleVersionChecker.TemplateDir", templateDir);
